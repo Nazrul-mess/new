@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white shadow-2xl rounded-3xl w-full max-w-lg overflow-hidden">
+        <div class="h-32 bg-blue-600"></div>
+        
+        <div class="px-8 pb-8">
+            <div class="relative -mt-16 mb-6 flex justify-center">
+                <img id="displayPhoto" src="https://via.placeholder.com/128" 
+                     class="w-32 h-32 rounded-full border-4 border-white object-cover bg-white shadow-md">
+            </div>
+
+            <h1 id="displayName" class="text-3xl font-bold text-center text-slate-800">User Name</h1>
+            <p id="displayEmail" class="text-center text-slate-500 mb-8">email@example.com</p>
+
+            <div class="space-y-4 border-t pt-6">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 font-medium">Date of Birth</span>
+                    <span id="displayDob" class="text-slate-700 font-semibold">YYYY-MM-DD</span>
+                </div>
+                </div>
+
+            <button onclick="logout()" class="w-full mt-10 bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 font-bold py-3 rounded-xl transition duration-200">
+                Log Out
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userData = JSON.parse(localStorage.getItem('currentUser'));
+
+            if (!userData) {
+                // If no user data exists, force them back to sign in
+                window.location.href = 'signin.html';
+                return;
+            }
+
+            // Populate the fields
+            document.getElementById('displayName').textContent = userData.name;
+            document.getElementById('displayEmail').textContent = userData.email;
+            document.getElementById('displayDob').textContent = userData.dob;
+            
+            if (userData.photo) {
+                document.getElementById('displayPhoto').src = userData.photo;
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'signin.html';
+        }
+    </script>
+</body>
+</html>

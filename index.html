@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Secure Auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white shadow-xl rounded-2xl w-full max-w-md overflow-hidden">
+        <div class="p-8">
+            <div id="registration-step">
+                <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Create Account</h2>
+                <p class="text-slate-500 mb-8">Join us to get started.</p>
+                
+                <form id="signupForm" class="space-y-4">
+                    <input type="text" id="fullName" placeholder="Full Name" required class="w-full px-4 py-3 rounded-lg bg-slate-100 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 text-sm">
+                    <input type="date" id="age" required class="w-full px-4 py-3 rounded-lg bg-slate-100 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 text-sm">
+                    <input type="email" id="email" placeholder="Email Address" required class="w-full px-4 py-3 rounded-lg bg-slate-100 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 text-sm">
+                    <input type="password" id="password" placeholder="Password" required minlength="6" class="w-full px-4 py-3 rounded-lg bg-slate-100 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 text-sm">
+                    
+                    <div class="flex flex-col">
+                        <label class="text-xs text-slate-400 mb-1 ml-1">Profile Photo</label>
+                        <input type="file" id="photo" accept="image/*" class="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200">Continue</button>
+                </form>
+                <p class="mt-4 text-center text-sm text-slate-600">Already have an account? <a href="signin.html" class="text-blue-600 font-semibold">signin</a></p>
+            </div>
+
+            <div id="otp-step" class="hidden">
+                <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Verify Email</h2>
+                <p class="text-slate-500 mb-8">We sent a 6-digit code to your email.</p>
+                
+                <form id="verifyForm" class="space-y-6">
+                    <input type="text" id="otp" maxlength="6" placeholder="000000" class="w-full text-center text-3xl tracking-[0.5em] font-mono py-3 rounded-lg bg-slate-100 border-2 border-transparent focus:border-blue-500 outline-none">
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">Verify & Register</button>
+                    <button type="button" id="resendBtn" onclick="resendOTP('signup')" class="w-full text-blue-600 text-sm font-medium">Resend Code</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:5000/api";
+        // const API_BASE = "https://sahinNR.eu.pythonanywhere.com//api";
+        let userEmail = "";
+
+        const toBase64 = file => new Promise((r, j) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => r(reader.result);
+            reader.onerror = e => j(e);
+        });
+
+        document.getElementById('signupForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const photoFile = document.getElementById('photo').files[0];
+            userEmail = document.getElementById('email').value;
+
+            const payload = {
+                fullName: document.getElementById('fullName').value,
+                age: document.getElementById('age').value,
+                email: userEmail,
+                password: document.getElementById('password').value,
+                photo: photoFile ? await toBase64(photoFile) : null
+            };
+
+            const res = await fetch(`${API_BASE}/signup`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.success) {
+                document.getElementById('registration-step').classList.add('hidden');
+                document.getElementById('otp-step').classList.remove('hidden');
+            } else { alert(data.message); }
+        };
+
+        document.getElementById('verifyForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch(`${API_BASE}/signup/verify`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email: userEmail, otp: document.getElementById('otp').value })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert("Verified! Redirecting to signin...");
+                window.location.href = "signin.html";
+            } else { alert(data.message); }
+        };
+
+        async function resendOTP(type) {
+            await fetch(`${API_BASE}/signup/resend`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email: userEmail })
+            });
+            alert("New code sent!");
+        }
+    </script>
+</body>
+</html>
