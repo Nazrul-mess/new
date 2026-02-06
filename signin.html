@@ -27,7 +27,7 @@
     <script>
         document.getElementById('signinForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch(`http://localhost:5000/api/signin`, {
+            const res = await fetch(`https://sahinnr.eu.pythonanywhere.com/api/signin`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -44,4 +44,5 @@
         };
     </script>
 </body>
+
 </html>
